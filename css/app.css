@@ -1,0 +1,143 @@
+:root{
+  --app--background-color:#ffffffff;
+  --app--font--color:#4a5057;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+html, body {
+  height:100%;
+
+  padding:0;
+  margin:0;
+
+  background-color: var(--app--background-color);
+  color: var(--app--font--color);
+}
+
+
+/** APP BASE **/
+
+.app {
+  position: relative;
+  overflow: hidden;
+  width:100vw;
+  height: 100vh;
+}
+
+/** INFO BUTTON **/
+
+.app__information {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  padding:.5em 1em;
+  border: 1px solid var(--app--font--color);
+  border-radius: 2em;
+  box-shadow: 1px 1px 10px 0 rgba(0,0,0,.3);
+
+  z-index: 1000;
+}
+
+
+/** SCREENS **/
+
+.app__screen {
+  position: absolute;
+  top:0;
+  left:100vw;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-color: var(--app--background-color);
+
+  transition: left .2s;
+}
+
+.app__screen--show-start .app__screen--start-screen{
+  left: 0;
+  z-index:200;
+}
+
+.app__screen--show-user .app__screen--user-screen{
+  left: 0;
+  z-index:200;
+}
+
+.app__screen--show-business .app__screen--business-screen{
+  left: 0;
+  z-index:200;
+}
+
+.app__screen--show-qr .app__screen--qr-screen{
+  left: 0;
+  z-index:200;
+}
+
+
+/** SCREEN START **/
+
+.app__screen--start-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.app__screen__button{
+   height: 40vw;
+   width: 40vw;
+
+   font-size: 1.2em;
+   font-weight: bold;
+
+   box-shadow: 0 0 10px 0 rgba(0,0,0,.1);
+}
+
+.app__screen__button--user {
+  margin-bottom: 1.2em;
+
+}
+
+.app__screen__button--business {
+  margin-top: 1.2em;
+}
+
+
+
+/** SCREEN USER **/
+
+.app__screen--user-screen {
+  
+}
+
+.app__screen--user-screen__button {
+
+}
+
+
+/** SCREEN QR **/
+
+.app__screen--qr-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.app__screen--qr-screen__button {
+  margin-top: 2em;
+  padding: .5em;
+}
+
+/** SCREEN BUSINESS **/
+
+.app__screen--business-screen {
+  
+}
+
+
+
+

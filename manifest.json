@@ -1,0 +1,23 @@
+{
+  "name": "My CheckIn",
+  "short_name": "MyCheckin",
+  "description": "Small App To CheckIn / Register at a Location / Event / Local-business /... , without saving data online.",
+  "icons": [
+      {
+        "src": "/pwa/img/icon-192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      }, 
+      {
+        "src": "/pwa/img/icon-512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      } 
+      ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "theme_color": "#ffffff" 
+}
