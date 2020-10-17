@@ -4,9 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "local:srv": "node ./help-srv/app.js",
+    "node:srv": "http-server . -p 8080"
   },
   "keywords": [],
   "author": "Charles Lam  <charles.lam@gmx.at>",
-  "license": "WTFPL"
+  "license": "WTFPL",
+  "dev- dependencies": {
+    "http-server": "^0.12.3"
+  }
 }

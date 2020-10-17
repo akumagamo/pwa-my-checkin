@@ -1,7 +1,7 @@
 
 const STORAGE_KEY = 'myCheckInStatusData';
-
 const CSS_SCREEN_SHOW_BLOCK_PREFIX = 'app__screen--show-';
+const CSS_HIDE_CLASS = 'global__hide';
 
 const APP_MODES = {
   START: 'start',
@@ -15,9 +15,24 @@ let baseStatus = `{"mode": "${APP_MODES.START}"}`;
 let myApp = {
   currentStatus: {},
   init: function init(){
+    this.setupServiceWorker();
+    this.checkDebugStatus();
     this.loadAppState();
     this.setupHTMLConnection();
     this.showCurrentScreen();
+  },
+  setupServiceWorker: function setupServiceWorker(){
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js', {scope: '/'})
+          .then((reg) => {
+            console.log('Registration succeeded. Scope is ' + reg.scope);
+          }, (error) => {
+            console.log('Registration failed with ' + error);
+          });
+    }
+  },
+  checkDebugStatus: function checkDebugStatus(){
+    this.isDebug = /(\?|&)debug=true/gi.test(location.search);
   },
   setupHTMLConnection: function setupHTMLConnection (){
     let that = this;
@@ -31,8 +46,7 @@ let myApp = {
     document.querySelector('#cancelButton').addEventListener('click', that.HandelModeSelection.bind(that));
     document.querySelector('#editUserDataButton').addEventListener('click', that.HandelModeSelection.bind(that));
 
-    document.querySelectorAll('.js-back-home').forEach(element => element.addEventListener('click', that.HandelModeSelection.bind(that)))
-    ;
+    document.querySelectorAll('.js-back-home').forEach(element => element.addEventListener('click', that.HandelModeSelection.bind(that)));
 
     window.onpopstate = function (event) {
       if (event.state) { 
@@ -44,9 +58,14 @@ let myApp = {
 
   },
   HandelModeSelection: function HandelModeSelection(event){
+    event.preventDefault();
     console.info(event.currentTarget);
     if(event.currentTarget.id === 'userButton') {
-      this.setMode(APP_MODES.USER, true);
+      if(this.currentStatus.currentUserData){
+        this.setMode(APP_MODES.QR, true);
+      } else {
+        this.setMode(APP_MODES.USER, true);
+      }
       this.showCurrentScreen();
     } else if(event.currentTarget.id === 'businessButton') {
       this.setMode(APP_MODES.BUSINESS, true);
@@ -67,7 +86,6 @@ let myApp = {
       this.setMode(APP_MODES.START, true);
       this.showCurrentScreen();
     }
-    
     
   },
   getDateTime: function getDateTime(){
@@ -111,6 +129,8 @@ let myApp = {
       CSS_SCREEN_SHOW_BLOCK_PREFIX + APP_MODES.BUSINESS,
       CSS_SCREEN_SHOW_BLOCK_PREFIX + APP_MODES.QR,
     );
+
+    document.querySelector('#infoButton').classList.remove(CSS_HIDE_CLASS);
   },
   updateCurrentScreen: function updateCurrentScreen(nextScreen){
     
@@ -126,6 +146,9 @@ let myApp = {
         }
         break;
     }
+  }, 
+  hideHelpButton: function hideHelpButton(){
+    document.querySelector('#infoButton').classList.add(CSS_HIDE_CLASS);
   },
   showCurrentScreen: function showCurrentScreen(){
     let nextScreen = APP_MODES.START;
@@ -133,6 +156,10 @@ let myApp = {
 
     if(this.currentStatus && this.currentStatus.mode) {
       nextScreen = this.currentStatus.mode;
+    }
+
+    if(nextScreen === APP_MODES.QR){
+      this.hideHelpButton();
     }
 
     this.updateCurrentScreen(nextScreen);

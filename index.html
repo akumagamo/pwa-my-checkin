@@ -15,11 +15,11 @@
     <div class="app__screen app__screen--start-screen">
       <button id="userButton" class="app__screen__button app__screen__button--user">
         <img src="img/user.png">
-        Registration Data
+        Kontaktdaten anlegen
       </button>
       <button id="businessButton" class="app__screen__button app__screen__button--business">
         <img src="img/business.png">
-        Registration Scanner
+        Kunden erfassen
       </button>
     </div>
     <div class="app__screen app__screen--user-screen">
@@ -51,20 +51,23 @@
       </div>
     </div>
     <div class="app__screen app__screen--qr-screen">
-      QR-DATA <br/>
-      <img style="width:90%" src="img/qr-placeholder.png">
-      <br/>
-      <span style="font-size:.9em;">Kontaktdaten: Max M. </span><br /><span style="font-style: italic;font-size:.8em;">generiert am: 2020-10-17 00:15</span>
-
+      <h2 class="app__screen--qr-screen__titel">QR-Code Kontaktdaten</h2>
+      <figure class="app__screen--qr-screen__figure">
+        <img class="app__screen--qr-screen__figure__img"  src="img/qr-placeholder.png">
+        <figcaption class="app__screen--qr-screen__figure__figcaption">
+          <span id="fullnameLabel" class="app__screen--qr-screen__figure__figcaption__name">Max M. </span><br />
+          <span id="createDateTimeLabel" class="app__screen--qr-screen__figure__figcaption__datetime">erzeugt: 2020-10-17 00:15</span>
+        </figcaption>
+      </figure>
+      <button id="editUserDataButton" class="app__screen--qr-screen__button"> Daten ändern </button>
+      <a href="#" class="js-back-home app__screen--qr-screen__link" > Zurück zur Startseite </a>      
       
-      <button id="editUserDataButton" class="app__screen--qr-screen__button"> Daten editieren </button>
-      <a href="#" class="js-back-home"> Zurück zur Startseite </a>
     </div>
     <div class="app__screen app__screen--business-screen">
       BUSINESS
     </div>
 
-    <div class="app__information">
+    <div id="infoButton" class="app__information">
       Help / Question ?
     </div>
   </div>
