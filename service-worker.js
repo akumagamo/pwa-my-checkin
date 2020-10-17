@@ -1,6 +1,7 @@
-const OFFLINE_VERSION = '0.0.2';
+const OFFLINE_VERSION = '0.0.6';
 const cacheName = `my-checkin-v${OFFLINE_VERSION}`;
 self.addEventListener('install', function(event) {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(cacheName).then(function(cache) {
       return cache.addAll([
@@ -10,6 +11,7 @@ self.addEventListener('install', function(event) {
           '/manifest.json',
           '/css/app.css',
           '/js/app.js',
+          '/js/qrcode.min.js',
           '/img/business.png',
           '/img/user.png',
           '/pwa/img/icon-192v2.png',

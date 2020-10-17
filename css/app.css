@@ -245,7 +245,7 @@ html, body {
 }
 
 .app__screen--qr-screen__figure__figcaption__name{
-
+  text-transform: capitalize;
 }
 
 .app__screen--qr-screen__figure__figcaption__datetime{

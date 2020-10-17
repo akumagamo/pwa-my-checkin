@@ -37,9 +37,9 @@
           <label class="app__screen--user-screen__label" for="email">
             Email*
             <input class="app__screen--user-screen__input" id="email" name="email" type="email" required="required" /></label>
-          <label class="app__screen--user-screen__label--date-label">aktualisiert am: <span id="currentDate">2020-10-15 07:00</span></label><br />
+          <label class="app__screen--user-screen__label--date-label">erstellt am: <span id="currentDate"></span></label><br />
           <div class="app__screen--user-screen__buttons">
-            <button id="cancelButton" class="app__screen--user-screen__button app__screen--user-screen__button--cancel"> Abbrechen </button>
+            <button type="button" id="cancelButton" class="app__screen--user-screen__button app__screen--user-screen__button--cancel"> Abbrechen </button>
             <button id="generateQrButton" class="app__screen--user-screen__button"> QR Generieren </button>
           </div>
       </form>
@@ -53,10 +53,10 @@
     <div class="app__screen app__screen--qr-screen">
       <h2 class="app__screen--qr-screen__titel">QR-Code Kontaktdaten</h2>
       <figure class="app__screen--qr-screen__figure">
-        <img class="app__screen--qr-screen__figure__img"  src="img/qr-placeholder.png">
+        <img id="qrImage" class="app__screen--qr-screen__figure__img">
         <figcaption class="app__screen--qr-screen__figure__figcaption">
-          <span id="fullnameLabel" class="app__screen--qr-screen__figure__figcaption__name">Max M. </span><br />
-          <span id="createDateTimeLabel" class="app__screen--qr-screen__figure__figcaption__datetime">erzeugt: 2020-10-17 00:15</span>
+          <span id="fullnameLabel" class="app__screen--qr-screen__figure__figcaption__name"></span><br />
+          <span id="createDateTimeLabel" class="app__screen--qr-screen__figure__figcaption__datetime"></span>
         </figcaption>
       </figure>
       <button id="editUserDataButton" class="app__screen--qr-screen__button"> Daten ändern </button>

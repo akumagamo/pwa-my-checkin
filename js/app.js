@@ -3,6 +3,8 @@ const STORAGE_KEY = 'myCheckInStatusData';
 const CSS_SCREEN_SHOW_BLOCK_PREFIX = 'app__screen--show-';
 const CSS_HIDE_CLASS = 'global__hide';
 
+const EXTERNAL_LIB_SCRIPTS = ['js/qrcode.min.js'];
+
 const APP_MODES = {
   START: 'start',
   USER: 'user',
@@ -15,11 +17,19 @@ let baseStatus = `{"mode": "${APP_MODES.START}"}`;
 let myApp = {
   currentStatus: {},
   init: function init(){
+    this.loadExternalLibs();
     this.setupServiceWorker();
     this.checkDebugStatus();
     this.loadAppState();
     this.setupHTMLConnection();
     this.showCurrentScreen();
+  },
+  loadExternalLibs: function loadExternalLibs(){
+    let script = document.createElement('script');
+    script.addEventListener('load', ()=> console.info(`script loaded: ${EXTERNAL_LIB_SCRIPTS[0]}`));
+    script.addEventListener('error', ()=> console.info(`script error: ${EXTERNAL_LIB_SCRIPTS[0]}`));
+    script.src = EXTERNAL_LIB_SCRIPTS[0];
+    document.body.append(script);
   },
   setupServiceWorker: function setupServiceWorker(){
     if ('serviceWorker' in navigator) {
@@ -55,7 +65,6 @@ let myApp = {
       }
       console.info(event);
     };
-
   },
   HandelModeSelection: function HandelModeSelection(event){
     event.preventDefault();
@@ -76,6 +85,10 @@ let myApp = {
         this.setCurrentUserData();
         this.setMode(APP_MODES.QR, true);
         this.showCurrentScreen();
+        let helper = {...myApp.currentStatus.currentUserData}
+        delete helper.qrCodeDataUrl;
+        let helperString = JSON.stringify(helper);
+        console.info(helperString, helperString.length);
       }
     }else if(event.currentTarget.id === 'editUserDataButton') {
       this.setMode(APP_MODES.USER, true);
@@ -86,7 +99,6 @@ let myApp = {
       this.setMode(APP_MODES.START, true);
       this.showCurrentScreen();
     }
-    
   },
   getDateTime: function getDateTime(){
     return (new Date()).toLocaleString("de-at");
@@ -99,7 +111,15 @@ let myApp = {
       email: document.querySelector('#email').value,
       generateDate: this.getDateTime(),
     };
+
+    this.currentStatus.currentUserData.qrCodeDataUrl = this.generateQRCode(); 
     this.saveCurrentStatus();
+  },
+  generateQRCode: function generateQRCode(){
+      let qrObj = qrcodeWrite( 8, 'L'); //qrcode(14,'M'); // TODO change/optimize for longer/ shorter Data
+      qrObj.addData(JSON.stringify(this.currentStatus.currentUserData)),
+      qrObj.make();
+      return qrObj.createDataURL();
   },
   setMode: function setMode(newMode, addToHistory){
     if(addToHistory){
@@ -116,7 +136,6 @@ let myApp = {
     let savedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || baseStatus);
     this.currentStatus = savedData;
     window.history.replaceState(this.currentStatus, null, "");
-
     console.info(this.currentStatus);
   },
   updateView: function updateView(){
@@ -135,8 +154,19 @@ let myApp = {
   updateCurrentScreen: function updateCurrentScreen(nextScreen){
     
     switch (nextScreen) {
+      case APP_MODES.QR:
+        this.hideHelpButton(this.currentStatus.currentUserData.qrCodeDataUrl);
+        console.info();
+        document.querySelector('#qrImage').src = this.currentStatus.currentUserData.qrCodeDataUrl;
+        document.querySelector('#fullnameLabel').innerText = 
+          `${this.currentStatus.currentUserData.firstname} ${this.currentStatus.currentUserData.lastname.substr(0,1)}.`;
+        document.querySelector('#createDateTimeLabel').innerText = 
+          `erzeugt: ${this.currentStatus.currentUserData.generateDate}`;
+        
+        break;
       case APP_MODES.USER:
         let userData = this.currentStatus.currentUserData;
+        this.hideHelpButton();
         if (userData){
           document.querySelector('#firstname').value = userData.firstname;
           document.querySelector('#lastname').value = userData.lastname;
@@ -156,10 +186,6 @@ let myApp = {
 
     if(this.currentStatus && this.currentStatus.mode) {
       nextScreen = this.currentStatus.mode;
-    }
-
-    if(nextScreen === APP_MODES.QR){
-      this.hideHelpButton();
     }
 
     this.updateCurrentScreen(nextScreen);
