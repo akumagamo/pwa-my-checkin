@@ -26,8 +26,13 @@ let myApp = {
 
     document.querySelector('#userButton').addEventListener('click', that.HandelModeSelection.bind(that));
     document.querySelector('#businessButton').addEventListener('click', that.HandelModeSelection.bind(that));
+
     document.querySelector('#generateQrButton').addEventListener('click', that.HandelModeSelection.bind(that));
+    document.querySelector('#cancelButton').addEventListener('click', that.HandelModeSelection.bind(that));
     document.querySelector('#editUserDataButton').addEventListener('click', that.HandelModeSelection.bind(that));
+
+    document.querySelectorAll('.js-back-home').forEach(element => element.addEventListener('click', that.HandelModeSelection.bind(that)))
+    ;
 
     window.onpopstate = function (event) {
       if (event.state) { 
@@ -42,16 +47,41 @@ let myApp = {
     console.info(event.currentTarget);
     if(event.currentTarget.id === 'userButton') {
       this.setMode(APP_MODES.USER, true);
+      this.showCurrentScreen();
     } else if(event.currentTarget.id === 'businessButton') {
       this.setMode(APP_MODES.BUSINESS, true);
+      this.showCurrentScreen();
     } else if(event.currentTarget.id === 'generateQrButton') {
-      this.setMode(APP_MODES.QR, true);
+      console.info(document.querySelector('form').checkValidity())
+      if(document.querySelector('form').checkValidity()){
+        this.setCurrentUserData();
+        this.setMode(APP_MODES.QR, true);
+        this.showCurrentScreen();
+      }
     }else if(event.currentTarget.id === 'editUserDataButton') {
       this.setMode(APP_MODES.USER, true);
+      this.showCurrentScreen();
+    }else if(event.currentTarget.id === 'cancelButton') {
+      history.back();
+    }else if(event.currentTarget.classList.contains('js-back-home')) {
+      this.setMode(APP_MODES.START, true);
+      this.showCurrentScreen();
     }
     
-    this.showCurrentScreen();
-
+    
+  },
+  getDateTime: function getDateTime(){
+    return (new Date()).toLocaleString("de-at");
+  },
+  setCurrentUserData: function setCurrentUserData(){
+    this.currentStatus.currentUserData = {
+      firstname: document.querySelector('#firstname').value,
+      lastname: document.querySelector('#lastname').value,
+      phoneNumber: document.querySelector('#phoneNumber').value,
+      email: document.querySelector('#email').value,
+      generateDate: this.getDateTime(),
+    };
+    this.saveCurrentStatus();
   },
   setMode: function setMode(newMode, addToHistory){
     if(addToHistory){
@@ -66,7 +96,7 @@ let myApp = {
   },
   loadAppState: function loadAppState(){
     let savedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || baseStatus);
-    this.currentStatus.mode = savedData.mode;
+    this.currentStatus = savedData;
     window.history.replaceState(this.currentStatus, null, "");
 
     console.info(this.currentStatus);
@@ -82,15 +112,31 @@ let myApp = {
       CSS_SCREEN_SHOW_BLOCK_PREFIX + APP_MODES.QR,
     );
   },
-  showCurrentScreen: function(){
-    let currentScreen = APP_MODES.START;
+  updateCurrentScreen: function updateCurrentScreen(nextScreen){
+    
+    switch (nextScreen) {
+      case APP_MODES.USER:
+        let userData = this.currentStatus.currentUserData;
+        if (userData){
+          document.querySelector('#firstname').value = userData.firstname;
+          document.querySelector('#lastname').value = userData.lastname;
+          document.querySelector('#phoneNumber').value = userData.phoneNumber;
+          document.querySelector('#email').value = userData.email;
+          document.querySelector('#currentDate').innerText = this.getDateTime();
+        }
+        break;
+    }
+  },
+  showCurrentScreen: function showCurrentScreen(){
+    let nextScreen = APP_MODES.START;
     this.hideAllScreens();
 
     if(this.currentStatus && this.currentStatus.mode) {
-      currentScreen = this.currentStatus.mode;
+      nextScreen = this.currentStatus.mode;
     }
 
-    this.htmlElement.classList.add( CSS_SCREEN_SHOW_BLOCK_PREFIX + currentScreen);
+    this.updateCurrentScreen(nextScreen);
+    this.htmlElement.classList.add( CSS_SCREEN_SHOW_BLOCK_PREFIX + nextScreen);
   },
 }
 

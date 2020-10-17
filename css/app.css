@@ -32,24 +32,70 @@ html, body {
   position: absolute;
   bottom: 1em;
   right: 1em;
+
+  height: 1em;
+  width: 8em;
+
   padding:.5em 1em;
   border: 1px solid var(--app--font--color);
   border-radius: 2em;
   box-shadow: 1px 1px 10px 0 rgba(0,0,0,.3);
 
+  color: #797c80d9;
   z-index: 1000;
+  transition: all .5s ease-in-out;
 }
 
+.app__information--small {
+  width: 3em;
+  height: 3em;
+  overflow: hidden;
+  padding: 0;
+}
+
+.app__information--small::after{
+  display: block;
+  content: '?';
+  background: transparent;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  color: transparent;
+  font-size: 2.25em;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.4;
+  animation: minimize-help-button .5s ease-in-out .1s ;
+  animation-fill-mode: forwards;
+}
+
+@keyframes minimize-help-button {
+  0%{
+    color: transparent;
+    background: transparent;
+  }
+  100%{
+    color: #797c80d9;
+    background: white;
+  }
+}
 
 /** SCREENS **/
 
 .app__screen {
+
+  --screen-padding: 2em;
+
   position: absolute;
   top:0;
   left:100vw;
 
-  width: 100vw;
+  width: calc( 100vw - calc(var(--screen-padding) * 2));
   height: 100vh;
+
+  padding: var(--screen-padding);
 
   background-color: var(--app--background-color);
 
@@ -75,7 +121,6 @@ html, body {
   left: 0;
   z-index:200;
 }
-
 
 /** SCREEN START **/
 
@@ -109,13 +154,65 @@ html, body {
 
 /** SCREEN USER **/
 
-.app__screen--user-screen {
-  
+.app__screen--user-screen { 
+
 }
+
+.app__screen--user-screen__label{
+  font-size: 1.2em;
+}
+
+.app__screen--user-screen__input{
+  --local-padding: 2px;
+  font-size: 1em;
+  padding: var(--local-padding);
+  width: calc(100% - calc(var(--local-padding) * 2) - 2px);
+  margin: .1em 0 .25em;
+}
+
+.app__screen--user-screen__label--date-label{
+  display: inline-block;
+  margin: .5em 0;
+  font-size: .9em;
+}
+
+
+.app__screen--user-screen__buttons {
+  display: flex;
+  justify-content:space-between;
+
+  margin-top: .5em;
+ 
+}
+
 
 .app__screen--user-screen__button {
-
+  padding: 1em;
+  font-weight: bold;
+  font-size: 1em;
 }
+
+.app__screen--user-screen__info-box{
+  border: 1px solid var(--app--font--color);
+  padding: 0 1em 1em 1em;
+  margin: 2em -.5em;
+  box-shadow: 3px 3px 10px 0 rgba(0,0,0,0.2);  
+  font-size: .9em;
+}
+
+.app__screen--user-screen__info-box__titel {
+  margin:.75em 0 .5em;
+}
+
+.app__screen--user-screen__info-box__content {
+  margin:.25em 0;
+  line-height: 1.3;
+}
+
+.global__content--text-unterline {
+  text-decoration: underline;
+}
+
 
 
 /** SCREEN QR **/

@@ -23,14 +23,32 @@
       </button>
     </div>
     <div class="app__screen app__screen--user-screen">
-      USER
-      <fieldset>
-        <label for="firstname">Vorname</label><br /><input id="firstname" name="firstname" type="text" /><br />
-        <label for="lastname">Nachname</label><br /><input id="firstname" name="firstname" type="text" /><br />
-        <label for="phoneNumber">TelefonNr</label><br /><input id="firstname" name="firstname" type="tel" /><br />
-        <label for="email">Email</label><br /><input id="firstname" name="firstname" type="email" /><br />
-        <button id="generateQrButton" class="app__screen--user-screen__button"> Generate QR </button>
-      </fieldset>
+      <h2>Persönlich Kontaktdaten</h2>
+      <form>
+          <label class="app__screen--user-screen__label" for="firstname">
+            Vorname* 
+            <input class="app__screen--user-screen__input" id="firstname" name="firstname" type="text" required="required" /></label>
+          <label class="app__screen--user-screen__label" for="lastname">
+            Nachname*
+            <input class="app__screen--user-screen__input" id="lastname" name="lastname" type="text" required="required" /></label>
+          <label class="app__screen--user-screen__label" for="phoneNumber">
+            Telefonnummer*
+            <input class="app__screen--user-screen__input" id="phoneNumber" name="phoneNumber" type="tel" required="required" /></label>
+          <label class="app__screen--user-screen__label" for="email">
+            Email*
+            <input class="app__screen--user-screen__input" id="email" name="email" type="email" required="required" /></label>
+          <label class="app__screen--user-screen__label--date-label">aktualisiert am: <span id="currentDate">2020-10-15 07:00</span></label><br />
+          <div class="app__screen--user-screen__buttons">
+            <button id="cancelButton" class="app__screen--user-screen__button app__screen--user-screen__button--cancel"> Abbrechen </button>
+            <button id="generateQrButton" class="app__screen--user-screen__button"> QR Generieren </button>
+          </div>
+      </form>
+      <div class="app__screen--user-screen__info-box">
+        <h2 class="app__screen--user-screen__info-box__titel">Information</h2>
+        <p class="app__screen--user-screen__info-box__content">
+          Die eingegeben Daten werden <span class="global__content--text-unterline">NUR</span> auf Ihrem Gerät gespeichert.
+        </p>
+      </div>
     </div>
     <div class="app__screen app__screen--qr-screen">
       QR-DATA <br/>
@@ -38,7 +56,9 @@
       <br/>
       <span style="font-size:.9em;">Kontaktdaten: Max M. </span><br /><span style="font-style: italic;font-size:.8em;">generiert am: 2020-10-17 00:15</span>
 
+      
       <button id="editUserDataButton" class="app__screen--qr-screen__button"> Daten editieren </button>
+      <a href="#" class="js-back-home"> Zurück zur Startseite </a>
     </div>
     <div class="app__screen app__screen--business-screen">
       BUSINESS
