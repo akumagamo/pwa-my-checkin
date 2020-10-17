@@ -1,4 +1,4 @@
-const OFFLINE_VERSION = '0.0.29';
+const OFFLINE_VERSION = '0.0.31';
 const cacheName = `my-checkin-v${OFFLINE_VERSION}`;
 self.addEventListener('install', function(event) {
   self.skipWaiting();

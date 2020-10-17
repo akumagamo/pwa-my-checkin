@@ -74,7 +74,9 @@ let myApp = {
   },
   initWebCam: function initWebCam(){
     let that = this;
-    if (this.externalScriptsLoaded && !this.webCamInitiated){
+    if (!this.externalScriptsLoaded){
+      setTimeout(() => that.initWebCam(), 200);
+    } else if ( !this.webCamInitiated){
       navigator.mediaDevices
       .getUserMedia({ video: { deviceId: {exact: 'a87ffab9e01f421aaa036f5b706b9232520cd56cf3e03156579971bf810a26df'} } })
       .then(function (stream) {
