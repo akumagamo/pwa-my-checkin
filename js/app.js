@@ -1,7 +1,17 @@
+/*
+
+  TODO:
+  -> Global refactoring
+  ---> Remove Constant - Values into "const" and Top of file
+
+
+*/
+
+
 
 const STORAGE_KEY = 'myCheckInStatusData';
 const CSS_SCREEN_SHOW_BLOCK_PREFIX = 'app__screen--show-';
-const CSS_HIDE_CLASS = 'global__hide';
+const CSS_HIDE_CLASS = 'global__hide'; 
 
 const EXTERNAL_LIB_SCRIPTS = ['js/qrcode-read.min.js','js/qrcode-write.min.js'];
 
@@ -20,14 +30,16 @@ let myApp = {
   externalScriptsLoaded: false,
   init: function init(){
     let that = this;
-    that.loadExternalLibs().then(function(){
-      that.setupServiceWorker();
-      that.checkDebugStatus();
-      that.loadAppState();
-      that.setupHTMLConnection();
-      that.showCurrentScreen();      
-      that.externalScriptsLoaded = true;
-    });
+    that.loadExternalLibs()
+      .then(()=> that.initWebCams())
+      .then(function(){
+        that.setupServiceWorker();
+        that.checkDebugStatus();
+        that.loadAppState();
+        that.setupHTMLConnection();
+        that.showCurrentScreen();      
+        that.externalScriptsLoaded = true;
+      });
   },
   loadExternalLibs: function loadExternalLibs(){
       let promise = Promise.resolve();
@@ -50,13 +62,20 @@ let myApp = {
     return promise;
   },
   setupServiceWorker: function setupServiceWorker(){
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator) {  
+      navigator.serviceWorker.addEventListener('message', function(event){
+        console.info('MESSAGE', event);
+        document.querySelector('#infoButton').innerHTML = event.data;
+      } );
+
       navigator.serviceWorker.register('service-worker.js', {scope: '/'})
           .then((reg) => {
+            console.info(reg);
             console.log('Registration succeeded. Scope is ' + reg.scope);
           }, (error) => {
             console.log('Registration failed with ' + error);
           });
+    
     }
   },
   checkDebugStatus: function checkDebugStatus(){
@@ -72,13 +91,30 @@ let myApp = {
       track.stop();
     });
   },
+  initWebCams: function(){
+    let dropdown = document.querySelector('#webCamsDropDown');
+    let fragment = document.createDocumentFragment();
+
+    return navigator.mediaDevices.enumerateDevices().then(devices => {
+        for (let idx in devices) {
+          const device = devices[idx];
+          let entry = document.createElement('option');
+          entry.innerText = device.label;
+          entry.value = device.deviceId;
+          fragment.append(entry);
+      }    
+      dropdown.innerHTML = '';
+      dropdown.append(fragment);  
+    });
+  },
   initWebCam: function initWebCam(){
     let that = this;
     if (!this.externalScriptsLoaded){
       setTimeout(() => that.initWebCam(), 200);
     } else if ( !this.webCamInitiated){
+      let capabilities = {video: { width: { ideal: 4096 } } };
       navigator.mediaDevices
-      .getUserMedia({ video: { deviceId: {exact: 'a87ffab9e01f421aaa036f5b706b9232520cd56cf3e03156579971bf810a26df'} } })
+      .getUserMedia(capabilities)
       .then(function (stream) {
         that.webCamVideo = document.createElement("video");
         that.webCamVideo.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
@@ -105,6 +141,7 @@ let myApp = {
         canvas.height = that.webCamVideo.videoHeight;
         canvas.width = that.webCamVideo.videoWidth;
         ctx.drawImage(that.webCamVideo, 0, 0, canvas.width, canvas.height);
+        console.info('--canvas', that.webCamVideo.videoWidth, that.webCamVideo.videoHeight) ;    
         requestAnimationFrame(tick);
       }
     }
@@ -113,9 +150,19 @@ let myApp = {
           qrcodeRead.decode();
         } catch (e) {
           console.info(e);
-          setTimeout(scan, 3000);
+          setTimeout(scan, 300);
         }
+        //requestAnimationFrame(tick);
       }      
+  },
+  updateWebCam: function updateWebCam(event){
+    let that = this;
+    let deviceId = event.currentTarget.value;
+    return navigator.mediaDevices.getUserMedia({ video:{ deviceId: deviceId, width: { ideal: 4096 }  }}).then(function(stream){
+      that.webCamVideo.srcObject = stream;
+      that.webCamVideo.play();
+      console.info('res', that.webCamVideo.videoWidth, that.webCamVideo.videoHeight) ;    
+    });
   },
   setupHTMLConnection: function setupHTMLConnection (){
     let that = this;
@@ -132,6 +179,8 @@ let myApp = {
     document.querySelector('#qrImage').addEventListener('error', that.reGenerateQrCode.bind(that));
 
     document.querySelectorAll('.js-back-home').forEach(element => element.addEventListener('click', that.handelModeSelection.bind(that)));
+
+    document.querySelector('#webCamsDropDown').addEventListener('change', that.updateWebCam.bind(that));;
 
     window.onpopstate = function (event) {
       if (event.state) { 

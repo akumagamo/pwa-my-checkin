@@ -1,3 +1,5 @@
 help-srv/
 node_modules/
 package-lock.json
+*.pem
+certs/

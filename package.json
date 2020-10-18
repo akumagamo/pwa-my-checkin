@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "local:srv": "node ./help-srv/app.js",
-    "node:srv": "http-server . -p 8080"
+    "node:srv": "http-server -S -C ./certs/cert.pem -K ./certs/key.pem -o -p 443"
   },
   "keywords": [],
   "author": "Charles Lam  <charles.lam@gmx.at>",

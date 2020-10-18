@@ -1,9 +1,15 @@
-const OFFLINE_VERSION = '0.0.31';
-const cacheName = `my-checkin-v${OFFLINE_VERSION}`;
+
+// ..... chrome://serviceworker-internals/
+
+const OFFLINE_VERSION = '0.0.59';
+const FETCH_CACHE_NAME = `my-checkin-v${OFFLINE_VERSION}`;
+let currentClientId;
+
 self.addEventListener('install', function(event) {
+  console.info('INSTALL', OFFLINE_VERSION, event);
   self.skipWaiting();
   event.waitUntil(
-    caches.open(cacheName).then(function(cache) {
+    caches.open(FETCH_CACHE_NAME).then(function(cache) {
       return cache.addAll([
           '/',
           '/index.html',
@@ -23,7 +29,8 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('activate', function(event) {
-  var cacheKeeplist = [cacheName];
+  console.info('ACTIVATE', OFFLINE_VERSION, event);
+  var cacheKeeplist = [FETCH_CACHE_NAME];
   event.waitUntil(
       caches.keys().then((keyList) => {
         return Promise.all(keyList.map( (key) => {
@@ -38,11 +45,20 @@ self.addEventListener('activate', function(event) {
 
 self.addEventListener('fetch', function(event) {
   event.respondWith(
-    caches.open(cacheName)
+    caches.open(FETCH_CACHE_NAME)
       .then(cache => cache.match(event.request, {ignoreSearch: true}))
       .then(response => {
-        console.info(response);
+        console.info('NEU', event);
+        console.info('NEU', currentClientId);
+        if(!currentClientId && /offline-version/gi.test(event.request.url)){
+          console.info('DRIN');
+          currentClientId = event.clientId;
+          self.clients.get(currentClientId).then(client => client.postMessage(OFFLINE_VERSION));
+        }
+        
         return (response || fetch(event.request));
       })
   );
 });
+
+self.addEventListener('message', (event) => { event.cl});
