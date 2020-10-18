@@ -14,6 +14,11 @@ const WEBCAM_BASE_CAPABILITIES = { video: { facingMode: { ideal: 'environment' }
 const WEBCAM_QR_DECODE_INTERVAL_MS = 800;
 const WEBCAM_QR_DECODE_TRIES_MAX = 10;
 
+const WEBCAM_QR_SCAN_RESULT_TYPE = {
+  ERROR: '-1',
+  SUCCESS: '1'
+};
+
 const STORAGE_KEY = 'myCheckInStatusData';
 const CSS_SCREEN_SHOW_BLOCK_PREFIX = 'app__screen--show-';
 const CSS_HIDE_CLASS = 'global__hide'; 
@@ -41,6 +46,7 @@ let myApp = {
     scanImageForQRCode: false,
     scanTries: 0,
     qrCodeFound: false,
+    qrCodeData: {},
   },
   init: function init(){
     let that = this;
@@ -60,6 +66,9 @@ let myApp = {
     qrcodeRead.callback = function(result) {
       if (result) {
         that.webCamObject.qrCodeFound = true;
+        that.webCamObject.qrCodeData = JSON.parse(result);
+        console.info(JSON.parse(result));
+        that.webCamObject.qrCodeData.loadDate = that.getDateTime();
         console.info('Good: ', result);
       } else {
         console.info('Bad SCAN No DATA', result);
@@ -130,6 +139,7 @@ let myApp = {
             that.webCamVideo.srcObject = stream;
             that.webCamVideo.play();
             
+            that.webCamObject.qrCodeData = {};
             that.webCamObject.qrCodeFound = false;
             that.webCamObject.initiated = true;
             that.webCamObject.renderVideo = true;
@@ -161,6 +171,28 @@ let myApp = {
       setTimeout( resolve, milliSeconds);
     });
   },
+  showQrScanResult: function showQrScanResult(type, data){
+    // TODO VALIDATE DATA
+    this.resetScanResult();
+     if(type === WEBCAM_QR_SCAN_RESULT_TYPE.SUCCESS){
+        document.querySelector('#scanStatusMessage').innerText = 'Daten erfolgreich geladen!';
+        document.querySelector('#scanFullnameLabel').innerText = 
+        `Name: ${this.generateFullname(data)}`;
+          document.querySelector('#scanPhoneNumberLabel').innerText = 
+          `Telefon: ${data.phoneNumber}`;
+          document.querySelector('#scanDateTimeLabel').innerText = 
+        `geladen: ${data.loadDate}`;
+     } else {
+        document.querySelector('#scanStatusMessage').innerText = 'Kein QR-Code erkannt!';
+     }
+
+  },
+  resetScanResult: function(){
+    document.querySelector('#scanStatusMessage').innerText = '';
+    document.querySelector('#scanFullnameLabel').innerText = ''
+    document.querySelector('#scanPhoneNumberLabel').innerText = '';
+    document.querySelector('#scanDateTimeLabel').innerText = '';
+  },
   scanForQRCode: function scanForQRCode(){
     let that = this;
     that.webCamObject.scanTries++;
@@ -169,14 +201,16 @@ let myApp = {
       that.webCamObject.canvas.width = parseInt(that.webCamVideo.videoWidth / 2);
       that.webCamObject.ctx.drawImage(that.webCamVideo, 0, 0, that.webCamObject.canvas.width, that.webCamObject.canvas.height);
       that.tryToDecodeImage()
-        .then(that.wait.bind(this, WEBCAM_QR_DECODE_INTERVAL_MS))
+        .then(that.wait.bind(that, WEBCAM_QR_DECODE_INTERVAL_MS))
         .then(that.scanForQRCode.bind(that));
     } else  {
-      if(!this.webCamObject.qrCodeFound){ // TODO OUTPUT NICE
-        alert('No Match found.');
-      } else {
-        alert('Match found.');
+      let resultType = WEBCAM_QR_SCAN_RESULT_TYPE.ERROR;
+      if(that.webCamObject.qrCodeFound){ 
+        that.makeVideoFlash();
+        resultType = WEBCAM_QR_SCAN_RESULT_TYPE.SUCCESS;
       }
+      that.showQrScanResult(resultType, that.webCamObject.qrCodeData);
+      that.activeScanButton();
     }
   },
   setupStartScreen: function setupStartScreen(){
@@ -222,6 +256,26 @@ let myApp = {
       }
       console.info(event);
   },
+  deactiveScanButton: function deactiveScanButton(){
+    let scanButton = document.querySelector('#scanButton');
+    scanButton.disabled = true;
+    scanButton.innerText = 'Scanning...';
+  },
+  activeScanButton: function activeScanButton(){
+    let scanButton = document.querySelector('#scanButton');
+    scanButton.disabled = false;
+    scanButton.innerText = 'Scan';
+  },
+  makeVideoFlash: function makeVideoFlash(){
+    document.querySelector('.app__screen--business-screen__flash-box')
+      .classList.add('app__screen--business-screen__flash-box--flash');
+      
+    console.info('FLASH');
+  },
+  resetVideoFlash: function makeVideoFlash(){
+    document.querySelector('.app__screen--business-screen__flash-box')
+      .classList.remove('app__screen--business-screen__flash-box--flash');
+  },
   handelModeSelection: function handelModeSelection(event){
     event.preventDefault();
     console.info(event.currentTarget);
@@ -250,6 +304,9 @@ let myApp = {
     } else if(event.currentTarget.id === 'scanButton') {
       this.webCamObject.scanTries = 0;
       this.webCamObject.qrCodeFound = false;
+      this.webCamObject.qrCodeData = {};
+      this.resetVideoFlash();
+      this.deactiveScanButton();
       Promise.resolve().then(this.scanForQRCode.bind(this));
     } else if(event.currentTarget.id === 'backButton') {
       this.setMode(APP_MODES.START, true);
@@ -304,7 +361,13 @@ let myApp = {
       CSS_SCREEN_SHOW_BLOCK_PREFIX + APP_MODES.QR,
     );
 
-    document.querySelector('#infoButton').classList.remove(CSS_HIDE_CLASS);
+    this.showHelpButton();
+    this.activeScanButton();
+    this.resetVideoFlash();
+    this.resetScanResult();
+  },
+  generateFullname: function(data){
+    return `${data.firstname} ${data.lastname.substr(0,1)}.`;
   },
   updateCurrentScreen: function updateCurrentScreen(nextScreen){
     
@@ -314,7 +377,7 @@ let myApp = {
         console.info();
         document.querySelector('#qrImage').src = this.currentQRCodeDataUrl;
         document.querySelector('#fullnameLabel').innerText = 
-          `${this.currentStatus.currentUserData.firstname} ${this.currentStatus.currentUserData.lastname.substr(0,1)}.`;
+          this.generateFullname(this.currentStatus.currentUserData);
         document.querySelector('#createDateTimeLabel').innerText = 
           `erzeugt: ${this.currentStatus.currentUserData.generateDate}`;
         
@@ -338,6 +401,9 @@ let myApp = {
   }, 
   hideHelpButton: function hideHelpButton(){
     document.querySelector('#infoButton').classList.add(CSS_HIDE_CLASS);
+  },
+  showHelpButton: function hideHelpButton(){
+    document.querySelector('#infoButton').classList.remove(CSS_HIDE_CLASS);
   },
   showCurrentScreen: function showCurrentScreen(){
     let nextScreen = APP_MODES.START;

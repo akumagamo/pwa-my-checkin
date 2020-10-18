@@ -66,16 +66,17 @@
     <div class="app__screen app__screen--business-screen">
       <h2 class="app__screen--business-screen__titel">QR-Scanner</h2>
       <canvas class="global__hide" id="scanCanvas"></canvas>
+      <div class="app__screen--business-screen__flash-box">
       <video class="app__screen--business-screen__video" id="scanVideo"></video>
+      </div>
       <div class="app__screen--business-screen__buttons">
         <button id="backButton" class="app__screen--business-screen__button"> Back </button>
         <button id="scanButton" class="app__screen--business-screen__button app__screen--business-screen__button--scan"> Scan </button>
       </div>
       <div class="app__screen--business-screen__scan-result">
-        <h3 id="scanStatusMessage"></h3>
-        <span id="scanErrorMessage" class="app__screen--business-screen__scan-result__error"></span><br />
+        <h3 id="scanStatusMessage" class="app__screen--business-screen__scan-result__titel"></h3>
         <span id="scanFullnameLabel" class="app__screen--business-screen__scan-result__name">234</span><br />
-        <span id="scanCreateDateTimeLabel" class="app__screen--business-screen__scan-result__datetime">234</span><br />
+        <span id="scanPhoneNumberLabel" class="app__screen--business-screen__scan-result__phone-number">234</span><br />
         <span id="scanDateTimeLabel" class="app__screen--business-screen__scan-result__datetime">234</span>
       </div>
       <a href="#" class="js-back-home app__screen--qr-screen__link" > Zurück zur Startseite </a>     

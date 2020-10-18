@@ -88,7 +88,7 @@ html, body {
   }
   100%{
     color: #797c80d9;
-    background: white;
+    background: var(--app--background-color);
   }
 }
 
@@ -273,22 +273,44 @@ html, body {
   flex-direction: column;
 }
 
-/*
-.app__screen--business-screen__canvas{
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  height: 40%;
-  background: rgba(0,0,0,.04);
-}*/
-
 .app__screen--business-screen__video{
   padding: 0;
   margin: 0;
   width: 100%;
-  /*height: 40%;*/
   background: rgba(0,0,0,.04);
 }
+
+.app__screen--business-screen__flash-box{
+  position: relative;
+}
+
+.app__screen--business-screen__flash-box--flash:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background: var(--app--background-color);
+  z-index: -1;
+  animation: .2s ease-in-out 0s 1 backwards flash;
+}
+
+@keyframes flash {
+  0% {
+    z-index: -1;
+  }
+  50% {
+    z-index: -1;
+  }
+  100% {
+    z-index: 100;
+  }
+}
+
+
+
 
 .app__screen--business-screen__buttons{
   display: flex;
@@ -306,5 +328,53 @@ html, body {
   flex-grow: 3;
   margin-left:1em;
 }
+
+
+
+.app__screen--business-screen__button--scan:disabled{
+  animation: 1s ease-in-out 0s infinite alternate pulsating-color;
+}
+
+
+/*
+1s ease-in-out 0 infinite alternate pulsating-color
+*/
+
+@keyframes pulsating-color {
+  0% {
+    color: #cdcdcdcd;
+  }
+  100% {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.app__screen--business-screen__scan-resul{
+  margin-bottom: 1em;
+}
+
+.app__screen--business-screen__scan-result__titel {
+  margin: 1em 0 .5em;
+}
+
+.app__screen--business-screen__scan-result__name {
+  text-transform: capitalize;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.app__screen--business-screen__scan-result__phone-number {
+  font-size: 1em;
+  font-weight: bold;
+  line-height: 1.5;
+}
+
+.app__screen--business-screen__scan-result__datetime {
+  font-style: italic;
+  line-height: 2.5;
+  text-align: right;
+  display: block;
+}
+
 
 
