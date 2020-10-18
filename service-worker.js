@@ -1,7 +1,7 @@
 
 // ..... chrome://serviceworker-internals/
 
-const OFFLINE_VERSION = '0.0.65';
+const OFFLINE_VERSION = '0.0.88';
 const FETCH_CACHE_NAME = `my-checkin-v${OFFLINE_VERSION}`;
 
 self.addEventListener('install', function(event) {
@@ -57,5 +57,3 @@ self.addEventListener('fetch', function(event) {
       })
   );
 });
-
-self.addEventListener('message', (event) => { event.cl});

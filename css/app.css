@@ -273,11 +273,20 @@ html, body {
   flex-direction: column;
 }
 
+/*
 .app__screen--business-screen__canvas{
   padding: 0;
   margin: 0;
   width: 100%;
   height: 40%;
+  background: rgba(0,0,0,.04);
+}*/
+
+.app__screen--business-screen__video{
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  /*height: 40%;*/
   background: rgba(0,0,0,.04);
 }
 
