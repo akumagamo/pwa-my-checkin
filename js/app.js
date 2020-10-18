@@ -10,13 +10,9 @@
 
 */
 
-
-const WEBCAM_BASE_CAPABILITIES = { video: { facingMode: { ideal: "environment" } }};  //{ width: { ideal: 4096 } }
-const WEBCAM_REFRESH_TIMEOUT_MS = 30;
-const WEBCAM_QR_DECODE_INTERVAL_MS = 800; // Performance HIT on Mobile
+const WEBCAM_BASE_CAPABILITIES = { video: { facingMode: { ideal: 'environment' } }};
+const WEBCAM_QR_DECODE_INTERVAL_MS = 800;
 const WEBCAM_QR_DECODE_TRIES_MAX = 10;
-
-const WEBCAM_TIMEOUT_MS =  60 * 1000; 
 
 const STORAGE_KEY = 'myCheckInStatusData';
 const CSS_SCREEN_SHOW_BLOCK_PREFIX = 'app__screen--show-';
@@ -31,7 +27,7 @@ const APP_MODES = {
   QR: 'qr',
 };
 
-let baseStatus = `{"mode": "${APP_MODES.START}"}`;
+const DEFAULT_STATUS_OBJECT = `{"mode": "${APP_MODES.START}"}`;
 
 let myApp = {
   currentStatus: {},
@@ -50,14 +46,13 @@ let myApp = {
     let that = this;
     that.setupServiceWorker()
       .then(that.loadExternalLibs.bind(that))
-      .then(that.initWebCams.bind(that))
       .then(function(){
+        that.externalScriptsLoaded = true;
         that.setupQRCodeReader();
         that.checkDebugStatus();
         that.loadAppState();
         that.setupHTMLConnection();
         that.showCurrentScreen();      
-        that.externalScriptsLoaded = true;
       });
   },
   setupQRCodeReader: function setupQRCodeReader(){
@@ -151,22 +146,6 @@ let myApp = {
     }
     this.webCamObject.scanImageForQRCode = false;
   },
-  initWebCams: function(){ /* NOT NEEDED NOW DELETE NEXT COMMIT */
-    let dropdown = document.querySelector('#webCamsDropDown');
-    let fragment = document.createDocumentFragment();
-
-    return navigator.mediaDevices.enumerateDevices().then(devices => {
-        for (let idx in devices) {
-          const device = devices[idx];
-          let entry = document.createElement('option');
-          entry.innerText = device.label;
-          entry.value = device.deviceId;
-          fragment.append(entry);
-      }    
-      dropdown.innerHTML = '';
-      dropdown.append(fragment);  
-    });
-  },
   tryToDecodeImage: function tryToDecodeImage(){
     if(!this.webCamObject.qrCodeFound){
       try {
@@ -177,6 +156,11 @@ let myApp = {
     }
     return Promise.resolve();
   },
+  wait: function wait(milliSeconds){
+    return new Promise(function(resolve){
+      setTimeout( resolve, milliSeconds);
+    });
+  },
   scanForQRCode: function scanForQRCode(){
     let that = this;
     that.webCamObject.scanTries++;
@@ -185,14 +169,8 @@ let myApp = {
       that.webCamObject.canvas.width = parseInt(that.webCamVideo.videoWidth / 2);
       that.webCamObject.ctx.drawImage(that.webCamVideo, 0, 0, that.webCamObject.canvas.width, that.webCamObject.canvas.height);
       that.tryToDecodeImage()
-        .then(function(){
-          return new Promise(function(resolve){
-            setTimeout( function(){
-              that.scanForQRCode();
-              resolve();
-            }, WEBCAM_QR_DECODE_INTERVAL_MS);
-          });
-        });
+        .then(that.wait.bind(this, WEBCAM_QR_DECODE_INTERVAL_MS))
+        .then(that.scanForQRCode.bind(that));
     } else  {
       if(!this.webCamObject.qrCodeFound){ // TODO OUTPUT NICE
         alert('No Match found.');
@@ -201,49 +179,48 @@ let myApp = {
       }
     }
   },
-  updateWebCam: function updateWebCam(event){  /* NOT NEEDED NOW DELETE NEXT COMMIT */
-    let that = this;
-    let deviceId = event.currentTarget.value;
-    return navigator.mediaDevices.getUserMedia({ video:{ deviceId: deviceId, width: { ideal: 4096 }  }}).then(function(stream){
-      that.webCamVideo.srcObject = stream;
-      that.webCamVideo.play();
-      console.info('res', that.webCamVideo.videoWidth, that.webCamVideo.videoHeight) ;    
-    });
+  setupStartScreen: function setupStartScreen(){
+    document.querySelector('#userButton').addEventListener('click', this.handelModeSelection.bind(this));
+    document.querySelector('#businessButton').addEventListener('click', this.handelModeSelection.bind(this));
+  },
+  setupUserScreen: function setupStartScreen(){
+    document.querySelector('#generateQrButton').addEventListener('click', this.handelModeSelection.bind(this));
+    document.querySelector('#cancelButton').addEventListener('click', this.handelModeSelection.bind(this));
+  },
+  setupQRScreen: function setupStartScreen(){
+    document.querySelector('#editUserDataButton').addEventListener('click', this.handelModeSelection.bind(this));
+    document.querySelector('#qrImage').addEventListener('error', this.reGenerateQrCode.bind(this));
+  },
+  setupBusinessScreen: function setupStartScreen(){
+    this.webCamVideo = document.querySelector('#scanVideo');
+    this.webCamVideo.setAttribute('playsinline', true); // TODO CHECK THIS CLAIM required to tell iOS safari we don't want fullscreen
+
+    this.webCamObject.canvas = document.querySelector('#scanCanvas');
+    this.webCamObject.ctx = this.webCamObject.canvas.getContext('2d');
+
+    document.querySelector('#scanButton').addEventListener('click', this.handelModeSelection.bind(this));
+    document.querySelector('#backButton').addEventListener('click', this.handelModeSelection.bind(this));
+  },
+  setupHistory: function setupHistory(){
+     window.addEventListener('popstate',  this.handelHistoryPopState.bind(this));  
   },
   setupHTMLConnection: function setupHTMLConnection (){
     let that = this;
-
     that.htmlElement = document.querySelector('.js-app');
-    that.webCamVideo = document.querySelector('#scanVideo');
-    that.webCamVideo.setAttribute("playsinline", true); // TODO CHECK THIS CLAIM required to tell iOS safari we don't want fullscreen
-
-    that.webCamObject.canvas = document.querySelector('#scanCanvas');
-    that.webCamObject.ctx = that.webCamObject.canvas.getContext('2d');
-
-    document.querySelector('#userButton').addEventListener('click', that.handelModeSelection.bind(that));
-    document.querySelector('#businessButton').addEventListener('click', that.handelModeSelection.bind(that));
-
-    document.querySelector('#generateQrButton').addEventListener('click', that.handelModeSelection.bind(that));
-    document.querySelector('#cancelButton').addEventListener('click', that.handelModeSelection.bind(that));
-    document.querySelector('#editUserDataButton').addEventListener('click', that.handelModeSelection.bind(that));
-
-    document.querySelector('#qrImage').addEventListener('error', that.reGenerateQrCode.bind(that));
-
     document.querySelectorAll('.js-back-home').forEach(element => element.addEventListener('click', that.handelModeSelection.bind(that)));
 
-     /* NOT NEEDED NOW DELETE NEXT COMMIT */
-    document.querySelector('#webCamsDropDown').addEventListener('change', that.updateWebCam.bind(that));
-
-    document.querySelector('#scanButton').addEventListener('click', that.handelModeSelection.bind(that));
-    document.querySelector('#backButton').addEventListener('click', that.handelModeSelection.bind(that));
-
-    window.onpopstate = function (event) {
+    that.setupStartScreen();
+    that.setupUserScreen();
+    that.setupBusinessScreen();
+    that.setupQRScreen();
+    that.setupHistory();
+  },
+  handelHistoryPopState: function handelHistoryPopState(event){
       if (event.state) { 
-        that.setMode(event.state.mode, false);
-        that.showCurrentScreen();
+        this.setMode(event.state.mode, false);
+        this.showCurrentScreen();
       }
       console.info(event);
-    };
   },
   handelModeSelection: function handelModeSelection(event){
     event.preventDefault();
@@ -264,9 +241,6 @@ let myApp = {
         this.setCurrentUserData();
         this.setMode(APP_MODES.QR, true);
         this.showCurrentScreen();
-        let helper = {...myApp.currentStatus.currentUserData}
-        let helperString = JSON.stringify(helper);
-        console.info(helperString, helperString.length);
       }
     } else if(event.currentTarget.id === 'editUserDataButton') {
       this.setMode(APP_MODES.USER, true);
@@ -286,7 +260,7 @@ let myApp = {
     }
   },
   getDateTime: function getDateTime(){
-    return (new Date()).toLocaleString("de-at");
+    return (new Date()).toLocaleString('de-at');
   },
   setCurrentUserData: function setCurrentUserData(){
     this.currentStatus.currentUserData = {
@@ -298,18 +272,17 @@ let myApp = {
     };
 
     this.currentQRCodeDataUrl = this.generateQRCode(); 
-    this.saveCurrentStatus();
   },
   generateQRCode: function generateQRCode(){
-      let qrObj = qrcodeWrite( 8, 'L'); //qrcode(14,'M'); // TODO change/optimize for longer/ shorter Data
+      // TODO change/optimize for longer/ shorter Data AND CATCH ERRORS
+      let qrObj = qrcodeWrite( 8, 'L'); 
       qrObj.addData(JSON.stringify(this.currentStatus.currentUserData)),
       qrObj.make();
       return qrObj.createDataURL();
   },
   setMode: function setMode(newMode, addToHistory){
     if(addToHistory){
-      // TODO REFACTOR 
-      window.history.pushState(this.currentStatus, null, "");
+      window.history.pushState(this.currentStatus, null, '');
     }
     this.currentStatus.mode = newMode;
     this.saveCurrentStatus();
@@ -318,9 +291,9 @@ let myApp = {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.currentStatus));
   },
   loadAppState: function loadAppState(){
-    let savedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || baseStatus);
+    let savedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || DEFAULT_STATUS_OBJECT);
     this.currentStatus = savedData;
-    window.history.replaceState(this.currentStatus, null, "");
+    window.history.replaceState(this.currentStatus, null, '');
     console.info(this.currentStatus);
   },
   resetAppScreens: function resetAppScreens(){
