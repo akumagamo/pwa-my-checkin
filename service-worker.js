@@ -1,12 +1,12 @@
 
 // ..... chrome://serviceworker-internals/
 
-const OFFLINE_VERSION = '0.0.59';
+const OFFLINE_VERSION = '0.0.65';
 const FETCH_CACHE_NAME = `my-checkin-v${OFFLINE_VERSION}`;
-let currentClientId;
 
 self.addEventListener('install', function(event) {
   console.info('INSTALL', OFFLINE_VERSION, event);
+  shouldShowStartScreen = true;
   self.skipWaiting();
   event.waitUntil(
     caches.open(FETCH_CACHE_NAME).then(function(cache) {
@@ -41,6 +41,11 @@ self.addEventListener('activate', function(event) {
         })
   .then(self.clients.claim()));
 
+  self.clients.matchAll().then(function(foundClients) {
+    for (var idx = 0 ; idx < foundClients.length ; idx++) {
+      foundClients[idx].postMessage({version:OFFLINE_VERSION});
+    }
+  });
 });
 
 self.addEventListener('fetch', function(event) {
@@ -48,14 +53,6 @@ self.addEventListener('fetch', function(event) {
     caches.open(FETCH_CACHE_NAME)
       .then(cache => cache.match(event.request, {ignoreSearch: true}))
       .then(response => {
-        console.info('NEU', event);
-        console.info('NEU', currentClientId);
-        if(!currentClientId && /offline-version/gi.test(event.request.url)){
-          console.info('DRIN');
-          currentClientId = event.clientId;
-          self.clients.get(currentClientId).then(client => client.postMessage(OFFLINE_VERSION));
-        }
-        
         return (response || fetch(event.request));
       })
   );

@@ -8,6 +8,11 @@
 */
 
 
+const WEBCAM_BASE_CAPABILITIES = { video: { width: { ideal: 4096 } } };
+const WEBCAM_REFRESH_TIMEOUT_MS = 200;
+const WEBCAM_QR_DECODE_INTERVAL_MS = 3000; // Performance HIT on Mobile
+
+const WEBCAM_TIMEOUT_MS =  60 * 1000; 
 
 const STORAGE_KEY = 'myCheckInStatusData';
 const CSS_SCREEN_SHOW_BLOCK_PREFIX = 'app__screen--show-';
@@ -26,14 +31,13 @@ let baseStatus = `{"mode": "${APP_MODES.START}"}`;
 
 let myApp = {
   currentStatus: {},
-  webCamInitiated: false,
   externalScriptsLoaded: false,
   init: function init(){
     let that = this;
-    that.loadExternalLibs()
-      .then(()=> that.initWebCams())
+    that.setupServiceWorker()
+      .then(that.loadExternalLibs.bind(that))
+      .then(that.initWebCams.bind(that))
       .then(function(){
-        that.setupServiceWorker();
         that.checkDebugStatus();
         that.loadAppState();
         that.setupHTMLConnection();
@@ -64,19 +68,22 @@ let myApp = {
   setupServiceWorker: function setupServiceWorker(){
     if ('serviceWorker' in navigator) {  
       navigator.serviceWorker.addEventListener('message', function(event){
-        console.info('MESSAGE', event);
-        document.querySelector('#infoButton').innerHTML = event.data;
-      } );
+        console.info('MESSAGE ', event.data);
+        if(event && event.data && event.data.reStart){
+          this.setMode(APP_MODES.START);
+        }
+      });
 
-      navigator.serviceWorker.register('service-worker.js', {scope: '/'})
+      return navigator.serviceWorker.register('service-worker.js', {scope: '/'})
           .then((reg) => {
-            console.info(reg);
-            console.log('Registration succeeded. Scope is ' + reg.scope);
+            console.log('Registration succeeded. Scope is ' + reg.scope, reg);
           }, (error) => {
-            console.log('Registration failed with ' + error);
+            console.log('Registration failed with ' + error, error);
           });
     
-    }
+    } 
+
+    return Promise.reject();
   },
   checkDebugStatus: function checkDebugStatus(){
     this.isDebug = /(\?|&)debug=true/gi.test(location.search);
@@ -90,6 +97,7 @@ let myApp = {
     this.webCamVideo.srcObject.getTracks().forEach(track => {
       track.stop();
     });
+    this.webCamObject.scanImage = false;
   },
   initWebCams: function(){
     let dropdown = document.querySelector('#webCamsDropDown');
@@ -107,53 +115,81 @@ let myApp = {
       dropdown.append(fragment);  
     });
   },
+  webCamObject: {
+    initiated: false,
+    renderStartTime: 0,
+    lastRefreshTime: 0,
+    lastQRDecodeTime: 0,
+    scanImage: false,
+  },
+  updateVideoFeed: function updateVideoFeed(frametime){
+    let delta = frametime - this.webCamObject.lastRefreshTime;
+    if(this.webCamObject.renderStartTime === 0 ){
+      this.webCamObject.renderStartTime = frametime;
+    }
+
+    if ( this.webCamObject.initiated && this.webCamObject.scanImage){
+      if( delta > WEBCAM_REFRESH_TIMEOUT_MS){
+        
+        this.webCamObject.lastRefreshTime = frametime;
+
+        console.info(parseInt(this.webCamVideo.videoHeight / 2), this.webCamVideo.videoHeight );
+        this.webCamObject.canvas.height = parseInt(this.webCamVideo.videoHeight / 2);
+        this.webCamObject.canvas.width = parseInt(this.webCamVideo.videoWidth / 2);
+        this.webCamObject.ctx.drawImage(this.webCamVideo, 0, 0, this.webCamObject.canvas.width, this.webCamObject.canvas.height);
+        let decodeDelta = frametime - this.webCamObject.lastQRDecodeTime; 
+        if(decodeDelta > WEBCAM_QR_DECODE_INTERVAL_MS){
+          this.webCamObject.lastQRDecodeTime = frametime;
+          Promise.resolve().then(this.tryToDecodeImage);
+        }
+      }
+
+      let maxRuntimeDelta = frametime - this.webCamObject.renderStartTime;
+      if( WEBCAM_TIMEOUT_MS > maxRuntimeDelta){
+        requestAnimationFrame(this.updateVideoFeed.bind(this));
+      } else {
+        this.stopWebCam();
+      }
+    }
+  },
+  tryToDecodeImage: function tryToDecodeImage(){
+    try {
+      qrcodeRead.decode();
+    } catch (e) {
+      console.info(e);
+    }
+  },
   initWebCam: function initWebCam(){
     let that = this;
     if (!this.externalScriptsLoaded){
+      // TODO Cleanup == Check again
       setTimeout(() => that.initWebCam(), 200);
-    } else if ( !this.webCamInitiated){
-      let capabilities = {video: { width: { ideal: 4096 } } };
+    } else if ( !this.webCamObject.initiated){
+      that.webCamObject.canvas = document.querySelector('#scanCanvas');
+      that.webCamObject.ctx = that.webCamObject.canvas.getContext('2d');
       navigator.mediaDevices
-      .getUserMedia(capabilities)
-      .then(function (stream) {
-        that.webCamVideo = document.createElement("video");
-        that.webCamVideo.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-        that.webCamVideo.srcObject = stream;
-        that.webCamVideo.play();
-        tick();
-        scan();
-        that.webCamInitiated = true;
-      });
+        .getUserMedia(WEBCAM_BASE_CAPABILITIES)
+        .then(function (stream) {
+            that.webCamVideo = document.createElement("video");
+            that.webCamVideo.setAttribute("playsinline", true); 
+            // TODO CHECK THIS CLAIM required to tell iOS safari we don't want fullscreen
+            that.webCamVideo.srcObject = stream;
+            that.webCamVideo.play();
+            
+            that.webCamObject.initiated = true;
+            that.webCamObject.scanImage = true;
+            requestAnimationFrame(that.updateVideoFeed.bind(that));
+        });
 
-      qrcodeRead.callback = (res) => {
-        if (res) {
-          console.info('S',res);
+      qrcodeRead.callback = function(result) {
+        if (result) {
+          console.info('Good: ', result);
           that.stopWebCam();
-
         } else {
-          console.info('SCAN');
+          console.info('SCAN No DATA', result);
         }
-      };
-
-      function tick() {
-        let canvas = document.querySelector('#scanCanvas');
-        let ctx = canvas.getContext('2d');
-        canvas.height = that.webCamVideo.videoHeight;
-        canvas.width = that.webCamVideo.videoWidth;
-        ctx.drawImage(that.webCamVideo, 0, 0, canvas.width, canvas.height);
-        console.info('--canvas', that.webCamVideo.videoWidth, that.webCamVideo.videoHeight) ;    
-        requestAnimationFrame(tick);
-      }
+      };   
     }
-      function scan() {
-        try {
-          qrcodeRead.decode();
-        } catch (e) {
-          console.info(e);
-          setTimeout(scan, 300);
-        }
-        //requestAnimationFrame(tick);
-      }      
   },
   updateWebCam: function updateWebCam(event){
     let that = this;
