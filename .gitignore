@@ -1,5 +1,8 @@
+doc/img/big/
 help-srv/
 node_modules/
 package-lock.json
 *.pem
 certs/
+_cert.html
+_video.html
