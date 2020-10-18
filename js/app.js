@@ -153,6 +153,7 @@ let myApp = {
       this.webCamVideo.srcObject.getTracks().forEach(track => {
         track.stop();
       });
+      this.webCamObject.initiated = false;
     }
     this.webCamObject.scanImageForQRCode = false;
   },
@@ -175,6 +176,7 @@ let myApp = {
     // TODO VALIDATE DATA
     this.resetScanResult();
      if(type === WEBCAM_QR_SCAN_RESULT_TYPE.SUCCESS){
+      document.querySelector('#scanStatusMessage').classList.add('app__screen--business-screen__scan-result__titel--success');
         document.querySelector('#scanStatusMessage').innerText = 'Daten erfolgreich geladen!';
         document.querySelector('#scanFullnameLabel').innerText = 
         `Name: ${this.generateFullname(data)}`;
@@ -183,7 +185,8 @@ let myApp = {
           document.querySelector('#scanDateTimeLabel').innerText = 
         `geladen: ${data.loadDate}`;
      } else {
-        document.querySelector('#scanStatusMessage').innerText = 'Kein QR-Code erkannt!';
+      document.querySelector('#scanStatusMessage').classList.add('app__screen--business-screen__scan-result__titel--error');
+      document.querySelector('#scanStatusMessage').innerText = 'Kein QR-Code erkannt!';
      }
 
   },
@@ -192,6 +195,7 @@ let myApp = {
     document.querySelector('#scanFullnameLabel').innerText = ''
     document.querySelector('#scanPhoneNumberLabel').innerText = '';
     document.querySelector('#scanDateTimeLabel').innerText = '';
+    document.querySelector('#scanStatusMessage').classList.remove('app__screen--business-screen__scan-result__titel--error','app__screen--business-screen__scan-result__titel--error');
   },
   scanForQRCode: function scanForQRCode(){
     let that = this;

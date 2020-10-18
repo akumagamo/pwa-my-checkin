@@ -1,6 +1,9 @@
 :root{
   --app--background-color:#ffffffff;
-  --app--font--color:#4a5057;
+  --app--font-color:#4a5057;
+
+  --font-color--error: #E00000;
+  --font-color--success: #00A300;
 
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
@@ -13,7 +16,7 @@ html, body {
   margin:0;
 
   background-color: var(--app--background-color);
-  color: var(--app--font--color);
+  color: var(--app--font-color);
 }
 
 /** GLOBAL STUFF **/
@@ -47,7 +50,7 @@ html, body {
   width: 8em;
 
   padding:.5em 1em;
-  border: 1px solid var(--app--font--color);
+  border: 1px solid var(--app--font-color);
   border-radius: 2em;
   box-shadow: 1px 1px 10px 0 rgba(0,0,0,.3);
 
@@ -122,9 +125,15 @@ html, body {
   z-index:200;
 }
 
+.app__screen--show-business {
+  overflow-y: auto;
+}
+
 .app__screen--show-business .app__screen--business-screen{
   left: 0;
   z-index:200;
+
+  overflow-y: auto;
 }
 
 .app__screen--show-qr .app__screen--qr-screen{
@@ -152,8 +161,7 @@ html, body {
 }
 
 .app__screen__button--user {
-  margin-bottom: 1.2em;
-
+  margin-top: -4.2em;
 }
 
 .app__screen__button--business {
@@ -200,7 +208,7 @@ html, body {
 }
 
 .app__screen--user-screen__info-box{
-  border: 1px solid var(--app--font--color);
+  border: 1px solid var(--app--font-color);
   padding: 0 1em 1em 1em;
   margin: 2em -.5em;
   box-shadow: 3px 3px 10px 0 rgba(0,0,0,0.2);  
@@ -336,10 +344,6 @@ html, body {
 }
 
 
-/*
-1s ease-in-out 0 infinite alternate pulsating-color
-*/
-
 @keyframes pulsating-color {
   0% {
     color: #cdcdcdcd;
@@ -355,6 +359,14 @@ html, body {
 
 .app__screen--business-screen__scan-result__titel {
   margin: 1em 0 .5em;
+}
+
+.app__screen--business-screen__scan-result__titel--success {
+  color: var(--font-color--success);
+}
+
+.app__screen--business-screen__scan-result__titel--error {
+  color: var(--font-color--error);
 }
 
 .app__screen--business-screen__scan-result__name {
