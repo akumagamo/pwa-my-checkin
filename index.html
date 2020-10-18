@@ -65,11 +65,20 @@
     </div>
     <div class="app__screen app__screen--business-screen">
       <h2 class="app__screen--business-screen__titel">QR-Scanner</h2>
-      <select id="webCamsDropDown"></select>
+      <select id="webCamsDropDown" class="global__hide"></select>
       <canvas class="app__screen--business-screen__canvas" id="scanCanvas"></canvas>
-      <button click="myApp.stopWebCam();"> Stop </button>
+      <div class="app__screen--business-screen__buttons">
+        <button id="backButton" class="app__screen--business-screen__button"> Back </button>
+        <button id="scanButton" class="app__screen--business-screen__button app__screen--business-screen__button--scan"> Scan </button>
+      </div>
+      <div class="app__screen--business-screen__scan-result">
+        <h3 id="scanStatusMessage"></h3>
+        <span id="scanErrorMessage" class="app__screen--business-screen__scan-result__error"></span><br />
+        <span id="scanFullnameLabel" class="app__screen--business-screen__scan-result__name">234</span><br />
+        <span id="scanCreateDateTimeLabel" class="app__screen--business-screen__scan-result__datetime">234</span><br />
+        <span id="scanDateTimeLabel" class="app__screen--business-screen__scan-result__datetime">234</span>
+      </div>
       <a href="#" class="js-back-home app__screen--qr-screen__link" > Zurück zur Startseite </a>     
-
     </div>
 
     <div id="infoButton" class="app__information">

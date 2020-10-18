@@ -269,14 +269,33 @@ html, body {
 /** SCREEN BUSINESS **/
 
 .app__screen--business-screen {
-  
+  display: flex;
+  flex-direction: column;
 }
 
 .app__screen--business-screen__canvas{
-  border: 1px solid black;
   padding: 0;
   margin: 0;
   width: 100%;
   height: 40%;
+  background: rgba(0,0,0,.04);
 }
+
+.app__screen--business-screen__buttons{
+  display: flex;
+  margin: 2em 0 1.5em;
+}
+
+.app__screen--business-screen__button{
+  flex-grow: 1;
+  padding: 1em;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+.app__screen--business-screen__button--scan{
+  flex-grow: 3;
+  margin-left:1em;
+}
+
 

@@ -9,7 +9,7 @@
 
 
 const WEBCAM_BASE_CAPABILITIES = { video: { width: { ideal: 4096 } } };
-const WEBCAM_REFRESH_TIMEOUT_MS = 200;
+const WEBCAM_REFRESH_TIMEOUT_MS = 200000;
 const WEBCAM_QR_DECODE_INTERVAL_MS = 3000; // Performance HIT on Mobile
 
 const WEBCAM_TIMEOUT_MS =  60 * 1000; 
@@ -216,7 +216,11 @@ let myApp = {
 
     document.querySelectorAll('.js-back-home').forEach(element => element.addEventListener('click', that.handelModeSelection.bind(that)));
 
-    document.querySelector('#webCamsDropDown').addEventListener('change', that.updateWebCam.bind(that));;
+    document.querySelector('#webCamsDropDown').addEventListener('change', that.updateWebCam.bind(that));
+
+
+    document.querySelector('#scanButton').addEventListener('click', that.handelModeSelection.bind(that));
+    document.querySelector('#backButton').addEventListener('click', that.handelModeSelection.bind(that));
 
     window.onpopstate = function (event) {
       if (event.state) { 
@@ -249,12 +253,17 @@ let myApp = {
         let helperString = JSON.stringify(helper);
         console.info(helperString, helperString.length);
       }
-    }else if(event.currentTarget.id === 'editUserDataButton') {
+    } else if(event.currentTarget.id === 'editUserDataButton') {
       this.setMode(APP_MODES.USER, true);
       this.showCurrentScreen();
-    }else if(event.currentTarget.id === 'cancelButton') {
+    } else if(event.currentTarget.id === 'cancelButton') {
       history.back();
-    }else if(event.currentTarget.classList.contains('js-back-home')) {
+    } else if(event.currentTarget.id === 'scanButton') {
+      alert('start Scanning');
+    } else if(event.currentTarget.id === 'backButton') {
+      this.setMode(APP_MODES.START, true);
+      this.showCurrentScreen();
+    } else if(event.currentTarget.classList.contains('js-back-home')) {
       this.setMode(APP_MODES.START, true);
       this.showCurrentScreen();
     }
@@ -335,7 +344,8 @@ let myApp = {
         }
         break;
       case APP_MODES.BUSINESS:
-          this.initWebCam();
+          this.hideHelpButton();
+          //this.initWebCam();
         break;
     }
   }, 
