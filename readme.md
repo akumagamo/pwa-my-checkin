@@ -10,7 +10,7 @@
 ## Versionnumber 0.1.0 (2020-10-18)
 (***Documentation last update 2020-10-18 20:30***)  
 
-This is a small tool to help with _checking in_ (registering) people, to an Event _local-business_, with ease and now backend.
+This is a small tool to help with _checking in_ (registering) people, to an Event _local-business_, with ease and no backend.
 Data is stored online on the devices, that are used (but it can be exported).
 
 ![screenhot main menu screen](./readme/screenshot_02.png)
@@ -30,6 +30,7 @@ _Some Screens from the "Customer Mode"_
 ## Roadmap / Future Features
 * Info Screen
 * Business Frontend
+  * Manual entry of customers
   * Save data in a List
    * Export Data
       * Google Spreadsheet
