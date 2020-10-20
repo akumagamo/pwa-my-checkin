@@ -1,11 +1,3 @@
-<style>
-  img { 
-    max-width:300px;
-    max-height:300px; 
-    margin-right:1em;
-    margin-bottom:1em;
-   }
-</style>
 # "My CheckIn": Checkin App for Offline use
 ## Versionnumber 0.1.0 (2020-10-18)
 (***Documentation last update 2020-10-18 20:30***)  
