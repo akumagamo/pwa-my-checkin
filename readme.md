@@ -78,10 +78,9 @@ _No Remote Repo created => Not yet Uploaded_ https://github.com/akumagamo/....gi
        +-+- readme               // images for reame.md
        | +-- ...
        +- .gitignore
-       +- copyrights.txt          // Info for files which might need acknowlegement
        +- favicon.ico
        +- index.html
-       +- LICENSE
+       +- LICENSE                 // License for ALL Files EXCEPT the external libraries in the js folder
        +- manifest.json 
        +- package.json
        +- readme.md (this document)
