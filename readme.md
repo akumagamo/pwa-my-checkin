@@ -44,7 +44,7 @@ This application has to run on an https server, with a valid Certificate, OR may
 There is a script to launch the "https-server" npm module, but you would have to create the needed certificates.
 
 ## SourceControl Link & Information
-_No Remote Repo created => Not yet Uploaded_ https://github.com/akumagamo/....git
+https://github.com/akumagamo/pwa-my-checkin.git
 
 ## Documentation
 
